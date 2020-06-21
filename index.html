@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Generator Icon Css</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.4.3.1.css">
+</head>
+<body>
+	<div class="container mt-lg-5 mt-md-3 mb-lg-5 mb-md-3" id="vuecontainer">
+		<h3 class="mb-5">ICON CSS GENERATOR By Affan</h3>
+		<div class="row justify-content-center" v-show="output">
+			<div class="col-12 text-right">
+				<button class="btn btn-lg btn-success mr-2" v-on:click="copy(output)">COPY</button>
+				<button class="btn btn-lg btn-warning" v-on:click="output = null">ULANGI</button>
+			</div>
+			<div class="col-12 mt-3">
+				<div class="p-3 bg-dark">
+					<code><pre class="text-white">{{output}}</pre></code>
+				</div>
+			</div>
+		</div>
+		<div class="row justify-content-center" v-show="!output">
+			<div class="col-12 col-lg-6" v-show="!icons.length">
+				<div class="form-group">
+					<label for="icons">Css Icon</label>
+					<textarea  v-model="icondata" class="form-control" id="icons" rows="5"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="regexstart">Delete and Separate with Word Start</label>
+					<textarea  v-model="regexStart" class="form-control" id="regexstart" rows="3"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="regexend">Delete and Separate with Word End</label>
+					<textarea  v-model="regexEnd" class="form-control" id="regexend" rows="3"></textarea>
+				</div>
+				<button class="btn btn-lg btn-primary" v-bind:disabledx="!nama||!css||!prefix||!icons||!icondata||!regexStart||!regexEnd" v-on:click="generate()">GENERATE</button>
+			</div>	
+			<div class="col-lg-8" v-show="icons.length">
+				<div class="alert alert-info"><strong>{{icons.length}} Icons</strong> Results of the class name generator, <strong class="text-danger">Click a few to delete then class name</strong>, or <strong class="text-primary" style="cursor: pointer;" v-on:click="icons = []">Retry Genereate</strong></div>
+				<div style="cursor: pointer;" class="bg-primary text-white p-1 mb-2 d-table mr-2 small float-left" v-for="(item,i) in icons" v-on:click="removeIcon(i)">{{item}}</div>
+			</div>
+			<div class="col-lg-4" v-show="icons.length">
+				<div class="form-group">
+					<label for="addstart">Add word of Fist</label>
+					<input type="text" v-model="addStart" class="form-control" id="addstart">
+				</div>
+				<div class="form-group">
+					<label for="addend">Add word of Last</label>
+					<input type="text" v-model="addEnd" class="form-control" id="addend">
+				</div>
+				<div class="form-group">
+					<label>Replaces Words</label>
+					<div class="row" v-for="(item,i) in replaces" >
+						<div class="col-5">
+							<div class="form-group">
+								<label>Find word</label>
+								<input type="text" class="form-control" v-model="item.find">
+							</div>
+						</div>
+						<div class="col-5">
+							<div class="form-group">
+								<label>Replace with</label>
+								<input type="text" class="form-control" v-model="item.replace">
+							</div>
+						</div>
+						<div class="col-2">
+							<button class="btn btn-sm btn-danger" title="Delete Option" v-on:click="removeReplace(i)">X</button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-12 text-center mb-3">
+							<button class="m-auto btn btn-link bt-sm" v-on:click="addReplace()">ADD REPLACE</button>
+						</div>
+
+						<div class="col-12">
+							<button class="m-auto btn btn-block btn-primary" v-on:click="updated()">UPDATE ICON</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="dropdown-divider mt-5 mb-5"></div>
+
+				<div class="form-group">
+					<label for="nama">Name Icon <small class="text-muted">For title of page html</small> </label>
+					<input type="text" v-model="nama" class="form-control" id="nama">
+				</div>
+				<div class="form-group">
+					<label for="css">Link Path CSS Lib</label>
+					<input type="text" v-model="css" class="form-control" id="css">
+				</div>
+				<div class="form-group">
+					<label for="prefix">Prefix</label>
+					<input type="text" v-model="prefix" class="form-control" id="prefix">
+				</div>
+				<div class="form-group">
+					<button class="m-auto btn btn-block btn-primary" v-bind:disabled="!nama||!css" v-on:click="render()">RENDER CODE HTML</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="js/vue.min.js"></script>
+	<script type="text/javascript">
+		function getSample(name,css){
+			return  `<!DOCTYPE html>
+<html>
+<head>
+	<title>
+	${name?name:''}
+	</title>
+	<link href="${css?css:''}" rel="stylesheet" type="text/css"/>
+	<style type="text/css">
+		.box-icon {
+			cursor: pointer;
+			margin-right: 22px;
+			float: left;
+			margin-bottom: 22px;
+			font-size: 28pt;
+			background: #2196F3;
+			text-align: center;
+			padding: 4px;
+			border-radius: 14px;
+			color: #fff;
+		}
+		.box-icon:hover{
+			background: #2880c5;
+		}
+		.box-icon .title {
+			font-size: 12pt;
+			padding: 8px;
+		}
+	</style>
+</head>
+<body>
+${app.prefix?'	<strong>add class "'+app.prefix+'"</strong>':''}
+	<div class="container">`;
+		}
+
+
+		var app = new Vue({
+			el:'#vuecontainer',
+			data:{
+				nama:null,
+				css:null,
+				prefix:null,
+				icons:[],
+				icondata:null,
+				message:null,
+				output:null,
+				regexStart:null,
+				regexEnd:null,
+				addStart:null,
+				addEnd:null,
+				replaces:[]
+			},
+			methods:{
+				copy:str=>{
+					var el = document.createElement('textarea');
+					el.value = str;
+					el.setAttribute('readonly','');
+					el.style = {position:'absolute',left:'-999999px'};
+					document.body.appendChild(el);
+					el.select();
+					document.execCommand('copy');
+					document.body.removeChild(el);
+					alert('Copied...!');
+				},
+				pushIcon:(classname)=>{
+					app.output += `	
+		<div class="box-icon" onclick="copy('${app.prefix?app.prefix+' ':''}${classname}')">
+			<i class="${app.prefix?app.prefix+' ':''}${classname}"></i>
+			<div class="title">${classname?classname:''}</div>
+		</div>`;
+				},
+				render:()=>{
+					if(Array.isArray(app.icons) && app.icons.length){
+						app.output = getSample(app.nama,app.css);
+						app.message = null;
+						app.icons.map(item=>{
+							app.pushIcon(item);
+						})
+						let endscript = 'script';
+						app.output += `	
+	</div>
+	<script>
+	function copy(str){
+		var el = document.createElement('textarea');
+		el.value = '<i class="'+str+'"></i>';
+		el.setAttribute('readonly','');
+		el.style = {position:'absolute',left:'-999999px'};
+		document.body.appendChild(el);
+		el.select();
+		document.execCommand('copy');
+		document.body.removeChild(el);
+		alert('Copied...!');
+	}
+	</${endscript}>
+</body>
+</html>`;
+					}else{
+						app.message = 'icon input must array type and icon min 1 class name';
+						app.output = null;
+					}
+				},
+				updated:()=>{
+					app.icons = app.icons.map(item=>{
+						app.replaces.map(rep=>{
+							item = item.replace(rep.find,rep.replace);
+						});
+						item = app.addStart + item + app.addEnd;
+						return item;
+					})
+				},
+				removeReplace:i=>{
+					app.replaces.splice(i,1);
+				},
+				addReplace:()=>{
+					app.replaces.push({
+						find:'',
+						replace:''
+					})
+				},
+				removeIcon:i=>{
+					app.icons.splice(i,1);
+				},
+				generate:()=>{
+					app.icons = [];
+					app.output = null;
+					let a = app.icondata.split(app.regexStart);
+					a = a.map(item=>{
+						let b = item.split(app.regexEnd);
+						item = b[0];
+						return item
+					})
+					app.icons = a;
+				}
+			}
+		})
+	</script>
+</body>
+</html>
